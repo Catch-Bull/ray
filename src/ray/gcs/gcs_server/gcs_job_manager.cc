@@ -182,7 +182,7 @@ void GcsJobManager::HandleMarkJobFinished(rpc::MarkJobFinishedRequest request,
                                  const std::optional<rpc::JobTableData> &result) {
         RAY_CHECK(thread_checker_.IsOnSameThread());
 
-        if (status.ok() && result) {
+        if (status.ok() && result && !result.is_dead()) {
           MarkJobAsFinished(*result, send_reply);
           return;
         }
