@@ -32,7 +32,13 @@ void InMemoryStoreClient::AsyncPut(const std::string &table_name,
   } else {
     inserted = table.Emplace(key, std::move(data));
   }
-  std::move(callback).Post("GcsInMemoryStore.Put", inserted);
+  int64_t delay_us = 0;
+  if (table_name == std::string("ACTOR")) {
+    /// 10 seconds
+    delay_us = 10 * 1000000;
+    RAY_LOG(INFO) << "[InMemoryStore][TEST ONLY]: " << table_name << " " << key << " " << delay_us;
+  }
+  std::move(callback).Post(delay_us, "GcsInMemoryStore.Put", inserted);
 }
 
 void InMemoryStoreClient::AsyncGet(

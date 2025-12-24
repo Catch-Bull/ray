@@ -1509,6 +1509,8 @@ void GcsActorManager::RestartActor(const ActorID &actor_id,
     actor->UpdateState(rpc::ActorTableData::RESTARTING);
     // Make sure to reset the address before flushing to GCS. Otherwise,
     // GCS will mistakenly consider this lease request succeeds when restarting.
+    RAY_LOG(INFO) << "[TEST ONLY] clean actor address";
+    std::this_thread::sleep_for(std::chrono::milliseconds(11000));
     actor->UpdateAddress(rpc::Address());
     mutable_actor_table_data->clear_resource_mapping();
     // The backend storage is reliable in the future, so the status must be ok.
@@ -1655,6 +1657,7 @@ void GcsActorManager::OnActorCreationSuccess(const std::shared_ptr<GcsActor> &ac
 
   auto actor_data_only_with_states =
       GenActorDataOnlyWithStates(*mutable_actor_table_data);
+  RAY_LOG(INFO) << "[TEST ONLY] before put";
   // The backend storage is reliable in the future, so the status must be ok.
   gcs_table_storage_->ActorTable().Put(
       actor_id,
@@ -1669,6 +1672,7 @@ void GcsActorManager::OnActorCreationSuccess(const std::shared_ptr<GcsActor> &ac
          // Invoke all callbacks for all registration requests of this actor (duplicated
          // requests are included) and remove all of them from
          // actor_to_create_callbacks_.
+         RAY_LOG(INFO) << "[TEST ONLY] run callback";
          RunAndClearActorCreationCallbacks(actor, reply, Status::OK());
        },
        io_context_});

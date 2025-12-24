@@ -72,6 +72,17 @@ class Postable {
   }
 
   template <typename... Args>
+  void Post(const int64_t &delay_us, const std::string &name, Args &&...args) && {
+    RAY_CHECK(func_ != nullptr) << "Postable has already been invoked.";
+    io_context_.post(
+        [func = std::move(func_),
+         args_tuple = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+          std::apply(func, std::move(args_tuple));
+        },
+        name, delay_us);
+  }
+
+  template <typename... Args>
   void Post(const std::string &name, Args &&...args) const & {
     RAY_CHECK(func_ != nullptr) << "Postable has already been invoked.";
     io_context_.post(
@@ -80,6 +91,17 @@ class Postable {
           std::apply(func, std::move(args_tuple));
         },
         name);
+  }
+
+  template <typename... Args>
+  void Post(const int64_t &delay_us, const std::string &name, Args &&...args) const & {
+    RAY_CHECK(func_ != nullptr) << "Postable has already been invoked.";
+    io_context_.post(
+        [func = std::move(func_),
+         args_tuple = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+          std::apply(func, std::move(args_tuple));
+        },
+        name, delay_us);
   }
 
   template <typename... Args>
